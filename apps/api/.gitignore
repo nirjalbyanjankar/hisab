@@ -1,0 +1,5 @@
+# Generated copies of version-matched Prisma agent skills.
+.agents/
+.claude/
+.cursor/
+.devin/

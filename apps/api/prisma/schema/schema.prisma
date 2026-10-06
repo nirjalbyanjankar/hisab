@@ -1,0 +1,163 @@
+// use prisma-8
+enum Role {
+  OWNER
+  ADMIN
+  PROJECT_MANAGER
+  FINANCE_VIEWER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum ExpenseCategory {
+  SOFTWARE
+  HARDWARE
+  TRAVEL
+  MARKETING
+  OTHER
+}
+
+model Organization {
+  id          String               @id @default(uuid())
+  name        String
+  slug        String               @unique
+  logoUrl     String?
+  currency    String               @default("USD")
+  createdAt   DateTime             @default(now())
+  updatedAt   temporal.updatedAt()
+
+  users       User[]
+  memberships Membership[]
+  clients     Client[]
+  invoices    Invoice[]
+  expenses    Expense[]
+  retainers   Retainer[]
+
+  @@map("organizations")
+}
+
+model User {
+  id             String               @id @default(uuid())
+  organizationId String
+  email          String
+  passwordHash   String
+  fullName       String
+  avatarUrl      String?
+  createdAt      DateTime             @default(now())
+  updatedAt      temporal.updatedAt()
+
+  organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberships    Membership[]
+
+  @@unique([organizationId, id])
+  @@unique([organizationId, email])
+
+  @@map("users")
+}
+
+model Membership {
+  id             String       @id @default(uuid())
+  role           Role         @default(FINANCE_VIEWER)
+  organizationId String
+  userId         String
+  createdAt      DateTime     @default(now())
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [organizationId, userId], references: [organizationId, id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@map("memberships")
+}
+
+model Client {
+  id             String               @id @default(uuid())
+  organizationId String
+  name           String
+  email          String
+  companyName    String?
+  taxId          String?
+  createdAt      DateTime             @default(now())
+  updatedAt      temporal.updatedAt()
+
+  organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoices       Invoice[]
+
+  @@unique([organizationId, id])
+  @@map("clients")
+}
+
+model Invoice {
+  id             String               @id @default(uuid())
+  organizationId String
+  clientId       String
+  invoiceNumber  String
+  status         InvoiceStatus        @default(DRAFT)
+  issueDate      DateTime
+  dueDate        DateTime
+  subtotal       Numeric(12, 2)
+  tax            Numeric(12, 2)       @default(0.00)
+  total          Numeric(12, 2)
+  pdfUrl         String?
+  notes          String?
+  createdAt      DateTime             @default(now())
+  updatedAt      temporal.updatedAt()
+
+  organization   Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  client         Client               @relation(fields: [organizationId, clientId], references: [organizationId, id], onDelete: Cascade)
+  items          InvoiceItem[]
+
+  @@unique([organizationId, id])
+  @@unique([organizationId, invoiceNumber])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id             String         @id @default(uuid())
+  organizationId String
+  invoiceId      String
+  description    String
+  quantity       Int            @default(1)
+  unitPrice      Numeric(12, 2)
+  amount         Numeric(12, 2)
+
+  invoice        Invoice        @relation(fields: [organizationId, invoiceId], references: [organizationId, id], onDelete: Cascade)
+
+  @@index([organizationId, invoiceId])
+  @@map("invoice_items")
+}
+
+model Expense {
+  id             String          @id @default(uuid())
+  organizationId String
+  title          String
+  amount         Numeric(12, 2)
+  category       ExpenseCategory @default(OTHER)
+  receiptUrl     String?
+  date           DateTime
+  createdAt      DateTime        @default(now())
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, date])
+  @@map("expenses")
+}
+
+model Retainer {
+  id             String         @id @default(uuid())
+  organizationId String
+  clientName     String
+  monthlyAmount  Numeric(12, 2)
+  billingDay     Int            @default(1)
+  active         Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("retainers")
+}

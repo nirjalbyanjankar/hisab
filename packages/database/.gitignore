@@ -1,0 +1,7 @@
+# Generated agent skill copies; sync with prisma skills sync when needed.
+.agents/
+.claude/
+.cursor/
+.devin/
+
+.env.previous
