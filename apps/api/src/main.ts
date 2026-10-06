@@ -1,10 +1,7 @@
 import "reflect-metadata";
 import { config } from "dotenv";
-import { NestFactory } from "@nestjs/core";
-import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import helmet from "helmet";
-import { AppModule } from "./app.module.js";
+import { createApplication } from "./app.factory.js";
 
 async function bootstrap() {
   config({ quiet: true });
@@ -12,18 +9,7 @@ async function bootstrap() {
   const port = Number(process.env.PORT ?? 3001);
   if (!Number.isInteger(port) || port < 1 || port > 65535)
     throw new Error("Invalid PORT");
-  const app = await NestFactory.create(AppModule);
-  app.use(helmet());
-  app.setGlobalPrefix("api/v1");
-  app.enableCors({ origin: process.env.WEB_ORIGIN ?? "http://localhost:3000" });
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
-  app.enableShutdownHooks();
+  const app = await createApplication();
   if (process.env.NODE_ENV !== "production") {
     const document = SwaggerModule.createDocument(
       app,

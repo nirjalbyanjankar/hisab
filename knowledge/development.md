@@ -39,8 +39,8 @@ is preserved as gitignored `packages/database/.env.previous`.
 
 Set `SEED_OWNER_PASSWORD` to at least 12 characters and run `make database.seed`.
 The seed creates `hisab-demo`, `owner@hisab.test`, and an OWNER membership in one
-transaction. Re-runs preserve existing rows and passwords. Passwords use the format
-`scrypt:<salt>:<hash>`; future auth code must implement this verification format.
+transaction. Re-runs preserve existing rows and passwords. Passwords use parameterized scrypt hashes. Authentication also accepts the previous
+`scrypt:<salt>:<hash>` seed format.
 
 `PRISMA_RESET_CONFIRM=hisab_dev make prisma.reset` deletes the local public and
 Prisma marker schemas, then replays migrations. It is restricted to the local
@@ -52,3 +52,5 @@ as part of installation, migrations, or seeding.
 `apps/docs` was preserved under `knowledge/starter-docs` and is excluded from the
 workspace. The screenshot does not show the contents of the other project's API
 or shared packages; those internals retain Hisab's implementation.
+
+Authentication setup and endpoints: [authentication.md](authentication.md).

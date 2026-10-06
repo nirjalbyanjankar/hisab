@@ -1,7 +1,8 @@
 # Hisab
 
 Multi-tenant invoice, expense, and retainer management in a pnpm/Turborepo monorepo.
-The current implementation is a database foundation and NestJS API scaffold.
+The current implementation includes authentication, tenant permissions, a NestJS API,
+and a basic browser UI for testing the platform.
 
 ```sh
 make install
@@ -14,3 +15,7 @@ make run
 
 Web runs on port 3000; API on port 3001; Swagger at `/api/docs` in development.
 See [development commands](knowledge/development.md) and [repository map](REPOKB.md).
+
+Authentication and permissions: [API guide](knowledge/authentication.md).
+
+Browser test UI: [frontend guide](apps/web/README.md).

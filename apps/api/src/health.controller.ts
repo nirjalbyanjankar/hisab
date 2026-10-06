@@ -1,3 +1,4 @@
+import { Public } from "./auth/auth.decorators.js";
 import {
   Controller,
   Get,
@@ -10,6 +11,7 @@ import { DATABASE } from "./database.module.js";
 
 @ApiTags("health")
 @Controller("health")
+@Public()
 export class HealthController {
   constructor(@Inject(DATABASE) private readonly db: Database) {}
 

@@ -9,7 +9,7 @@
     "start": "node dist/src/main.js",
     "check-types": "tsc --noEmit",
     "lint": "eslint src --max-warnings 0",
-    "predev": "pnpm --filter database build && prisma contract emit",
+    "predev": "pnpm --filter @hisab/permissions build && pnpm --filter database build && prisma contract emit",
     "lint:fix": "eslint src --fix --max-warnings 0",
     "prisma:format": "prisma contract format",
     "prisma:generate": "prisma contract emit",
@@ -19,13 +19,17 @@
     "prisma:verify": "prisma db verify",
     "prisma:plan": "prisma contract emit && prisma migration plan",
     "prisma:reset": "node scripts/reset-local-db.mjs",
-    "database:seed": "pnpm --filter database build && pnpm run build && node dist/src/database/seed.js"
+    "database:seed": "pnpm --filter database build && pnpm run build && node dist/src/database/seed.js",
+    "test": "node --test test/password.test.mjs test/permissions.test.mjs",
+    "test:e2e": "pnpm --filter @hisab/permissions build && pnpm --filter database build && pnpm run build && node scripts/test-auth-e2e.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",
+    "@nestjs/jwt": "^12.0.2",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/swagger": "^11.0.0",
+    "@nestjs/throttler": "^6.7.1",
     "@prisma/orm-postgres": "8.0.0-rc.13",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
@@ -33,9 +37,11 @@
     "dotenv": "^17.0.0",
     "helmet": "^8.0.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.0"
+    "rxjs": "^7.8.0",
+    "@hisab/permissions": "workspace:*"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^24.0.0",
     "eslint": "10.9.1",
     "prisma": "8.0.0-rc.19",
