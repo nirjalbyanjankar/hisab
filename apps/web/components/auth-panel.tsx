@@ -1,5 +1,7 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import { Brand } from "./brand";
+import { WorkspaceIllustration } from "./workspace-illustration";
+import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { apiRequest, errorMessage, type Session } from "../lib/api";
 
 export function AuthPanel({
@@ -12,8 +14,61 @@ export function AuthPanel({
   onAuthenticated: (session: Session) => void;
 }) {
   const [signup, setSignup] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const formAreaRef = useRef<HTMLElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const previousHeight = useRef<number | null>(null);
+  const cardAnimation = useRef<Animation | null>(null);
+
+  useLayoutEffect(() => {
+    const card = cardRef.current;
+    const area = formAreaRef.current;
+    if (!card || !area) return;
+    const fitCard = () => {
+      const scale = Math.min(1, (area.clientHeight - 32) / card.offsetHeight);
+      card.style.setProperty("--auth-card-scale", String(Math.max(0.1, scale)));
+    };
+    const observer = new ResizeObserver(fitCard);
+    observer.observe(area);
+    observer.observe(card);
+    fitCard();
+    return () => observer.disconnect();
+  }, []);
+
+  useLayoutEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    const from =
+      cardAnimation.current?.playState === "running"
+        ? card.offsetHeight
+        : previousHeight.current;
+    cardAnimation.current?.cancel();
+    const to = card.offsetHeight;
+    previousHeight.current = to;
+    if (
+      from !== null &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      cardAnimation.current = card.animate(
+        [
+          { height: `${from}px`, overflow: "hidden" },
+          { height: `${to}px`, overflow: "hidden" },
+        ],
+        { duration: 380, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+      );
+    }
+  }, [signup]);
+
+  function switchMode(next: boolean) {
+    if (next === signup) return;
+    previousHeight.current = cardRef.current?.offsetHeight ?? null;
+    setSignup(next);
+    setShowPassword(false);
+    setError("");
+  }
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -50,64 +105,54 @@ export function AuthPanel({
   return (
     <main className="auth-layout">
       <section className="auth-story">
-        <a className="brand" href="/" aria-label="Hisab home">
-          <span className="brand-mark">h.</span> hisab
-          <span className="brand-dot">.</span>
-        </a>
+        <Brand inverted />
+        <div className="business-visual">
+          <WorkspaceIllustration />
+        </div>
         <div className="story-copy">
-          <span className="eyebrow light">
-            A clearer picture of your business
-          </span>
+          <span className="eyebrow light">Your business, connected</span>
           <h1>
-            Your books.
+            A clearer picture.
             <br />
-            Your people.
-            <br />
-            <em>One workspace.</em>
+            <em>A better workspace.</em>
           </h1>
           <p>
-            Keep clients, invoices, expenses, and retainers together. Give your
-            team the access they need.
+            From your first client to your next invoice. Keep your books,
+            expenses, and team together in Hisab.
           </p>
-          <div className="story-preview">
-            <div className="preview-top">
-              <span className="status-dot" /> Your organization’s workspace{" "}
-              <span>↗</span>
-            </div>
-            <div className="preview-row">
-              <span>Clients & relationships</span>
-              <span>Organized</span>
-            </div>
-            <div className="preview-row">
-              <span>Team permissions</span>
-              <span>In your control</span>
-            </div>
-            <div className="preview-row">
-              <span>Business records</span>
-              <span>In one place</span>
-            </div>
-          </div>
         </div>
-        <p className="story-foot">Built for teams. Made for clarity.</p>
+        <p className="story-foot">
+          Clients · Invoices · Expenses · Retainers · Team
+        </p>
       </section>
-      <section className="auth-form-area">
-        <div className="auth-form-card">
-          <span className="eyebrow">Welcome to Hisab</span>
-          <h2>{signup ? "Start your workspace" : "Good to see you again"}</h2>
+      <section className="auth-form-area" ref={formAreaRef}>
+        <div
+          className="auth-form-card"
+          ref={cardRef}
+          data-mode={signup ? "signup" : "login"}
+        >
+          <div className="auth-card-brand">
+            <Brand />
+          </div>
+          <h2 key={signup ? "signup-heading" : "login-heading"}>
+            {signup ? "Create your workspace" : "Log in to Hisab"}
+          </h2>
           <p className="muted">
             {signup
               ? "Create your organization and its owner account."
               : "Sign in to your organization’s workspace."}
           </p>
-          <div className="auth-tabs" aria-label="Account options">
+          <div
+            className="auth-tabs"
+            aria-label="Account options"
+            data-signup={signup}
+          >
             <button
               type="button"
               disabled={busy}
               className={!signup ? "active" : ""}
-              onClick={() => {
-                setSignup(false);
-                setError("");
-              }}
+              aria-pressed={!signup}
+              onClick={() => switchMode(false)}
             >
               Sign in
             </button>
@@ -115,10 +160,8 @@ export function AuthPanel({
               type="button"
               disabled={busy}
               className={signup ? "active" : ""}
-              onClick={() => {
-                setSignup(true);
-                setError("");
-              }}
+              aria-pressed={signup}
+              onClick={() => switchMode(true)}
             >
               Create organization
             </button>
@@ -191,24 +234,37 @@ export function AuthPanel({
               </label>
               <label>
                 Password
-                <input
-                  name="password"
-                  type="password"
-                  required
-                  minLength={signup ? 12 : 1}
-                  maxLength={128}
-                  placeholder={
-                    signup ? "At least 12 characters" : "Your password"
-                  }
-                  autoComplete={signup ? "new-password" : "current-password"}
-                />
+                <div className="password-field">
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    minLength={signup ? 12 : 1}
+                    maxLength={128}
+                    placeholder={
+                      signup ? "At least 12 characters" : "Your password"
+                    }
+                    autoComplete={signup ? "new-password" : "current-password"}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    aria-pressed={showPassword}
+                    onClick={() => setShowPassword((visible) => !visible)}
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
               </label>
               <button className="button primary full" type="submit">
                 {busy
                   ? "Please wait…"
                   : signup
                     ? "Create workspace →"
-                    : "Sign in →"}
+                    : "Log in →"}
               </button>
             </fieldset>
           </form>

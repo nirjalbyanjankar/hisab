@@ -1,4 +1,5 @@
 "use client";
+import { Brand } from "./brand";
 import { useCallback, useEffect, useState } from "react";
 import type { Permission } from "@hisab/permissions";
 import {
@@ -47,6 +48,18 @@ const NAV: { key: Tab; label: string; icon: string; permission: Permission }[] =
       permission: "profile:read",
     },
   ];
+const ICON_PATHS: Record<Tab, string> = {
+  clients:
+    "M4 3h12v14H4z M8 7a2 2 0 1 0 4 0a2 2 0 1 0-4 0 M7 14v-1a3 3 0 0 1 6 0v1",
+  invoices: "M5 2h10v16l-2-1-3 1-3-1-2 1z M8 6h4 M8 10h4",
+  expenses: "M3 14l5-5 3 3 6-8 M12 4h5v5",
+  retainers:
+    "M16 7a6 6 0 0 0-10-2L3 8 M3 3v5h5 M4 13a6 6 0 0 0 10 2l3-3 M17 17v-5h-5",
+  members:
+    "M7 9a3 3 0 1 0 0-6a3 3 0 1 0 0 6 M2 17v-2a5 5 0 0 1 10 0v2 M14 4a3 3 0 0 1 0 6 M15 12a4 4 0 0 1 3 4v1",
+  access: "M10 2l7 3v5c0 4-7 8-7 8S3 14 3 10V5z M7 10l2 2 4-4",
+};
+
 const DESCRIPTION: Record<Tab, string> = {
   clients: "The people and businesses you work with.",
   members: "The right people. The right permissions.",
@@ -150,11 +163,39 @@ export function Workspace({
   }
   return (
     <div className="workspace-layout">
+      <header className="workspace-header">
+        <Brand />
+        <span className="header-divider" aria-hidden="true" />
+        <span className="header-workspace-name">
+          {session.organization.name}
+        </span>
+        <nav className="header-shortcuts" aria-label="Quick navigation">
+          <button
+            type="button"
+            onClick={() => navigate("clients")}
+            aria-current={tab === "clients" ? "page" : undefined}
+          >
+            People
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("invoices")}
+            aria-current={tab === "invoices" ? "page" : undefined}
+          >
+            Billing
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("access")}
+            aria-current={tab === "access" ? "page" : undefined}
+          >
+            My access
+          </button>
+        </nav>
+        <span className="role-badge">{roleLabel(session.role)}</span>
+      </header>
       <aside className="sidebar">
-        <a className="brand" href="/" aria-label="Hisab home">
-          <span className="brand-mark">h.</span> hisab
-          <span className="brand-dot">.</span>
-        </a>
+        <h2 className="sidebar-title">Workspace</h2>
         <div className="organization-card">
           <span className="organization-icon">
             {session.organization.name.slice(0, 1).toUpperCase()}
@@ -174,7 +215,20 @@ export function Workspace({
               className={`nav-item ${tab === item.key ? "selected" : ""}`}
               onClick={() => navigate(item.key)}
             >
-              <span aria-hidden>{item.icon}</span>
+              <span aria-hidden="true">
+                <svg
+                  width="17"
+                  height="17"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d={ICON_PATHS[item.key]} />
+                </svg>
+              </span>
               {item.label}
               {!can(item.permission) && (
                 <span className="nav-lock" aria-label="Restricted">
@@ -208,7 +262,7 @@ export function Workspace({
           <span>
             Workspace <span className="breadcrumb">/</span> {currentNav.label}
           </span>
-          <span className="role-badge">{roleLabel(session.role)}</span>
+          <span className="topbar-slug">{session.organization.slug}</span>
         </header>
         <div className="workspace-content">
           <div className="page-heading">
@@ -232,26 +286,13 @@ export function Workspace({
               </button>
             )}
           </div>
-          <div className="summary-grid">
-            <div className="summary-card">
-              <span>Organization</span>
-              <strong>{session.organization.name}</strong>
-              <small>{session.organization.slug}</small>
-            </div>
-            <div className="summary-card">
-              <span>Your role</span>
-              <strong>{roleLabel(session.role)}</strong>
-              <small>
-                {session.role === "FINANCE_VIEWER"
-                  ? "Read-only access"
-                  : "Permissions set by your organization"}
-              </small>
-            </div>
-            <div className="summary-card accent">
-              <span>Workspace currency</span>
-              <strong>{session.organization.currency}</strong>
-              <small>Shared across your business records</small>
-            </div>
+          <div className="workspace-context">
+            <span>
+              <span className="context-dot" aria-hidden="true" />
+              {session.organization.name}
+            </span>
+            <span>{roleLabel(session.role)} access</span>
+            <span>{session.organization.currency}</span>
           </div>
           {error && (
             <div className="alert" role="alert">
