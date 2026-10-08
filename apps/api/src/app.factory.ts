@@ -10,7 +10,10 @@ export async function createApplication(quiet = false) {
   );
   app.use(helmet());
   app.setGlobalPrefix("api/v1");
-  app.enableCors({ origin: process.env.WEB_ORIGIN ?? "http://localhost:3000" });
+  app.enableCors({
+    origin: process.env.WEB_ORIGIN ?? "http://localhost:3000",
+    credentials: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

@@ -1,6 +1,9 @@
 import { Transform } from "class-transformer";
 import {
   IsEmail,
+  IsOptional,
+  IsPhoneNumber,
+  IsUrl,
   IsIn,
   IsString,
   Matches,
@@ -48,6 +51,54 @@ export class SignupDto extends LoginDto {
   @Matches(/\S/)
   fullName!: string;
 
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(60)
+  @Matches(/\S/)
+  firstName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  middleName?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(60)
+  @Matches(/\S/)
+  lastName?: string;
+
+  @ApiProperty({ required: false, example: "+12025550123" })
+  @IsOptional()
+  @IsPhoneNumber()
+  phoneNumber?: string;
+
+  @ApiProperty({ required: false, example: "https://example.com" })
+  @IsOptional()
+  @MaxLength(2048)
+  @IsUrl({ protocols: ["http", "https"], require_protocol: true })
+  companyWebsite?: string;
+
+  @ApiProperty({
+    required: false,
+    enum: ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001+"],
+  })
+  @IsOptional()
+  @IsIn(["1-10", "11-50", "51-200", "201-500", "501-1000", "1001+"])
+  employeeCount?: string;
+
+  @ApiProperty({ required: false, writeOnly: true })
+  @IsOptional()
+  @IsString()
+  @MinLength(12)
+  @MaxLength(128)
+  confirmPassword?: string;
+
   @ApiProperty({ minLength: 12, maxLength: 128, writeOnly: true })
   @MinLength(12)
   declare password: string;
@@ -72,4 +123,26 @@ export class CreateMemberDto {
   @ApiProperty({ enum: ROLES.filter((role) => role !== "OWNER") })
   @IsIn(ROLES.filter((role) => role !== "OWNER"))
   role!: Role;
+}
+
+export class UpdateProfileDto {
+  @ApiProperty()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(120)
+  @Matches(/\S/)
+  fullName!: string;
+}
+export class ChangePasswordDto {
+  @ApiProperty({ writeOnly: true })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(128)
+  currentPassword!: string;
+
+  @ApiProperty({ minLength: 12, maxLength: 128, writeOnly: true })
+  @IsString()
+  @MinLength(12)
+  @MaxLength(128)
+  newPassword!: string;
 }

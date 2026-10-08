@@ -17,6 +17,15 @@ Create an organization with `POST /api/v1/auth/signup`:
 ```
 
 Signup creates organization, user and OWNER membership in a single transaction.
+The registration UI also collects required first/last name, optional middle name,
+phone number with country calling code, company website, employee-count range,
+and password confirmation. Personal details are saved on User; website and
+employee-count range are saved on Organization. Confirmation passwords are
+validated but never persisted. New fields are nullable in the database and
+optional for API callers to preserve existing records and older signup clients.
+When first/last name are supplied, fullName is derived from the name parts.
+Passwords keep Hisab's existing minimum of 12 characters.
+
 Roles and organization IDs cannot be supplied in this payload. Organization slugs
 and email addresses are normalized to lowercase.
 
@@ -24,9 +33,24 @@ Login: `POST /api/v1/auth/login` with `organizationSlug`, `email` and `password`
 Both return a 15-minute `accessToken`, safe user/organization details, current role
 and permissions. Paste the token into Swagger's **Authorize** dialog, or send
 `Authorization: Bearer <accessToken>`. Tokens are bound to issuer `hisab` and audience
-`hisab-api`; only HS256 is accepted. Log in again after expiry. Refresh tokens,
-password recovery and email verification are future work. A basic browser UI now
-provides signup/login, client management, team roles and permission inspection.
+`hisab-api`; only HS256 is accepted. Signup/login also set a seven-day HttpOnly
+refresh cookie scoped to `/api/v1/auth`, with SameSite=Lax and Secure in production.
+`POST /auth/refresh` exchanges that cookie for a fresh access token and current
+permissions. The refresh token has a separate `hisab-refresh` audience and a
+password-version fingerprint, so it cannot authorize business requests and a
+password change invalidates previous refresh tokens. Its seven-day lifetime is
+fixed, rather than extended on every refresh.
+
+The browser automatically restores sessions and retries expired-token requests
+once, sharing concurrent refresh requests. Temporary network errors preserve the
+session. `POST /auth/logout` clears the cookie; issued tokens remain valid until
+expiration. Refresh sessions are stateless, so there is no device-session list or
+server-side per-device revocation. Password recovery and email verification remain
+future work.
+
+Cookie endpoints check browser origins against `WEB_ORIGIN`. CORS allows credentials
+only for that configured origin. Production frontend and API must use HTTPS on the
+same site for SameSite=Lax cookies (for example, app.example.com and api.example.com).
 
 `JWT_SECRET` is required and must contain at least 32 bytes. A private development
 secret was added to the existing gitignored API `.env`. New environments must
@@ -48,6 +72,8 @@ All paths below are under `/api/v1`.
 | ------------------------------------------------- | ------------------------------- |
 | `POST /auth/signup`, `POST /auth/login`           | Public, rate limited            |
 | `GET /health`, `GET /health/ready`                | Public                          |
+| `POST /auth/refresh`, `POST /auth/logout`         | Refresh cookie / clears cookie  |
+| `PATCH /auth/me`, `POST /auth/change-password`    | Any valid member                |
 | `GET /auth/me`                                    | Any valid member                |
 | `GET /clients`, `GET /clients/:id`                | All four roles                  |
 | `POST /clients`, `PATCH /clients/:id`             | OWNER, ADMIN, PROJECT_MANAGER   |

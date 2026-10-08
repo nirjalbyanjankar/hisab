@@ -26,6 +26,8 @@ model Organization {
   id          String               @id @default(uuid())
   name        String
   slug        String               @unique
+  website     String?
+  employeeCount String?
   logoUrl     String?
   currency    String               @default("USD")
   createdAt   DateTime             @default(now())
@@ -47,6 +49,10 @@ model User {
   email          String
   passwordHash   String
   fullName       String
+  firstName      String?
+  middleName     String?
+  lastName       String?
+  phoneNumber    String?
   avatarUrl      String?
   createdAt      DateTime             @default(now())
   updatedAt      temporal.updatedAt()

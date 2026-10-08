@@ -5,7 +5,7 @@ import {
   type FinancialRecord,
   type InvoiceItem,
 } from "../lib/api";
-import type { WorkspaceApi } from "./clients-panel";
+import type { WorkspaceApi } from "../lib/api";
 
 type FinancialTab = "invoices" | "expenses" | "retainers";
 function money(value: string | undefined, currency: string) {

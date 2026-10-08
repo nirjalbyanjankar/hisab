@@ -1,14 +1,10 @@
 "use client";
+import PageLayout from "./layout";
 import { useState, type FormEvent } from "react";
-import type { Client } from "../lib/api";
+import type { Client } from "../../../lib/api";
 
-export interface WorkspaceApi {
-  <T>(
-    path: string,
-    options?: { method?: string; body?: unknown; signal?: AbortSignal },
-  ): Promise<T>;
-}
-export function ClientsPanel({
+import type { WorkspaceApi } from "../../../lib/api";
+export default function ClientsPage({
   clients,
   canCreate,
   canUpdate,
@@ -50,7 +46,7 @@ export function ClientsPanel({
     }
   }
   return (
-    <div className={`content-grid ${canCreate || editing ? "with-form" : ""}`}>
+    <PageLayout withForm={Boolean(canCreate || editing)}>
       <section className="panel">
         <div className="panel-heading">
           <h3>Your clients</h3>
@@ -171,6 +167,6 @@ export function ClientsPanel({
           </form>
         </section>
       )}
-    </div>
+    </PageLayout>
   );
 }

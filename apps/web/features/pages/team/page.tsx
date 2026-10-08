@@ -1,10 +1,11 @@
 "use client";
+import PageLayout from "./layout";
 import { useState, type FormEvent } from "react";
 import { ROLES, canAssignRole, type Role } from "@hisab/permissions";
-import { roleLabel, type Member } from "../lib/api";
-import type { WorkspaceApi } from "./clients-panel";
+import { roleLabel, type Member } from "../../../lib/api";
+import type { WorkspaceApi } from "../../../lib/api";
 
-export function TeamPanel({
+export default function TeamPage({
   members,
   role,
   api,
@@ -61,7 +62,7 @@ export function TeamPanel({
     }
   }
   return (
-    <div className="content-grid with-form">
+    <PageLayout>
       <section className="panel">
         <div className="panel-heading">
           <h3>Your team</h3>
@@ -174,6 +175,6 @@ export function TeamPanel({
           Share the credentials privately with your colleague.
         </p>
       </section>
-    </div>
+    </PageLayout>
   );
 }

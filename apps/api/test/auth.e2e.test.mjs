@@ -28,7 +28,11 @@ test("authentication, tenant isolation, live roles and credential abuse protecti
       },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
-    return { status: response.status, body: await response.json() };
+    return {
+      status: response.status,
+      body: await response.json(),
+      cookie: response.headers.get("set-cookie"),
+    };
   }
   async function expect(path, options, status) {
     const result = await request(path, options);
@@ -77,6 +81,17 @@ test("authentication, tenant isolation, live roles and credential abuse protecti
             email: "OWNER@example.test",
             password,
             fullName: "Owner",
+            ...(organizationSlug === "tenant-a"
+              ? {
+                  firstName: "Jane",
+                  middleName: "Alex",
+                  lastName: "Doe",
+                  phoneNumber: "+12025550123",
+                  companyWebsite: "https://example.com",
+                  employeeCount: "11-50",
+                  confirmPassword: password,
+                }
+              : {}),
           },
         },
         201,
@@ -87,6 +102,44 @@ test("authentication, tenant isolation, live roles and credential abuse protecti
     assert.notEqual(a.organization.id, b.organization.id);
     assert.equal(a.role, "OWNER");
     withoutSecrets(a);
+    await t.test(
+      "registration saves personal and company details without storing confirmation passwords",
+      async () => {
+        const user = await db.orm.public.User.where({
+          id: a.user.id,
+          organizationId: a.organization.id,
+        })
+          .select(
+            "firstName",
+            "middleName",
+            "lastName",
+            "phoneNumber",
+            "fullName",
+          )
+          .first();
+        assert.deepEqual(user, {
+          firstName: "Jane",
+          middleName: "Alex",
+          lastName: "Doe",
+          phoneNumber: "+12025550123",
+          fullName: "Jane Alex Doe",
+        });
+        const company = await db.orm.public.Organization.where({
+          id: a.organization.id,
+        })
+          .select("website", "employeeCount")
+          .first();
+        assert.deepEqual(company, {
+          website: "https://example.com",
+          employeeCount: "11-50",
+        });
+        const legacy = await db.orm.public.User.where({ id: b.user.id })
+          .select("firstName", "phoneNumber")
+          .first();
+        assert.equal(legacy.firstName, null);
+        assert.equal(legacy.phoneNumber, null);
+      },
+    );
     await t.test("duplicate slug rolls back without orphan users", async () => {
       await expect(
         "/auth/signup",
@@ -126,6 +179,63 @@ test("authentication, tenant isolation, live roles and credential abuse protecti
     assert.equal(loggedIn.user.id, a.user.id);
     const tokenA = loggedIn.accessToken;
     const tokenB = b.accessToken;
+    await t.test(
+      "cookie renewal restores sessions after access expiry and logout clears the cookie",
+      async () => {
+        const result = await request("/auth/login", {
+          method: "POST",
+          body: {
+            organizationSlug: "tenant-a",
+            email: "owner@example.test",
+            password,
+          },
+        });
+        assert.equal(result.status, 200);
+        assert.match(result.cookie, /HttpOnly/i);
+        assert.match(result.cookie, /SameSite=Lax/i);
+        assert.match(result.cookie, /Max-Age=604800/i);
+        const cookie = result.cookie.split(";")[0];
+        const jwt = new JwtService({ secret: process.env.JWT_SECRET });
+        const expired = await jwt.signAsync(
+          { sub: a.user.id, organizationId: a.organization.id },
+          {
+            algorithm: "HS256",
+            issuer: "hisab",
+            audience: "hisab-api",
+            expiresIn: -1,
+          },
+        );
+        await expect("/auth/me", { token: expired }, 401);
+        const restored = await expect(
+          "/auth/refresh",
+          { method: "POST", headers: { cookie } },
+          200,
+        );
+        assert.equal(restored.user.id, a.user.id);
+        withoutSecrets(restored);
+        await expect("/auth/me", { token: restored.accessToken }, 200);
+        await expect(
+          "/auth/me",
+          { token: cookie.slice("hisab_refresh=".length) },
+          401,
+        );
+        await expect(
+          "/auth/refresh",
+          {
+            method: "POST",
+            headers: { cookie, origin: "https://attacker.example" },
+          },
+          403,
+        );
+        const logout = await request("/auth/logout", {
+          method: "POST",
+          headers: { cookie },
+        });
+        assert.equal(logout.status, 200);
+        assert.match(logout.cookie, /hisab_refresh=;/);
+        await expect("/auth/refresh", { method: "POST" }, 401);
+      },
+    );
     await t.test(
       "invalid credentials are generic and tokens are verified strictly",
       async () => {

@@ -1,5 +1,7 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
 import {
   ConflictException,
+  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -15,7 +17,13 @@ import {
 } from "@hisab/permissions";
 import { DATABASE } from "../database.module.js";
 import type { Database } from "../database/client.js";
-import type { CreateMemberDto, LoginDto, SignupDto } from "./auth.dto.js";
+import type {
+  ChangePasswordDto,
+  UpdateProfileDto,
+  CreateMemberDto,
+  LoginDto,
+  SignupDto,
+} from "./auth.dto.js";
 import type { TenantContext } from "./auth.types.js";
 import { hashPassword, verifyPassword } from "./password.js";
 
@@ -28,6 +36,22 @@ export class AuthService {
   ) {}
 
   async signup(input: SignupDto) {
+    if (
+      input.confirmPassword !== undefined &&
+      input.confirmPassword !== input.password
+    )
+      throw new BadRequestException("Passwords do not match");
+    if (Boolean(input.firstName) !== Boolean(input.lastName))
+      throw new BadRequestException("First and last name are both required");
+    const fullName =
+      input.firstName && input.lastName
+        ? [input.firstName, input.middleName, input.lastName]
+            .map((part) => part?.trim())
+            .filter(Boolean)
+            .join(" ")
+        : input.fullName.trim();
+    if (fullName.length > 120)
+      throw new BadRequestException("Full name must be at most 120 characters");
     const passwordHash = await hashPassword(input.password);
     let tenant: TenantContext;
     try {
@@ -35,11 +59,21 @@ export class AuthService {
         const organization = await tx.orm.public.Organization.create({
           name: input.organizationName.trim(),
           slug: input.organizationSlug,
+          ...(input.companyWebsite ? { website: input.companyWebsite } : {}),
+          ...(input.employeeCount
+            ? { employeeCount: input.employeeCount }
+            : {}),
         });
         const user = await tx.orm.public.User.create({
           organizationId: organization.id,
           email: input.email,
-          fullName: input.fullName.trim(),
+          fullName,
+          ...(input.firstName ? { firstName: input.firstName.trim() } : {}),
+          ...(input.middleName?.trim()
+            ? { middleName: input.middleName.trim() }
+            : {}),
+          ...(input.lastName ? { lastName: input.lastName.trim() } : {}),
+          ...(input.phoneNumber ? { phoneNumber: input.phoneNumber } : {}),
           passwordHash,
         });
         await tx.orm.public.Membership.create({
@@ -120,6 +154,45 @@ export class AuthService {
     };
   }
 
+  async updateProfile(tenant: TenantContext, input: UpdateProfileDto) {
+    const user = await this.db.orm.public.User.where({
+      id: tenant.userId,
+      organizationId: tenant.organizationId,
+    })
+      .select("id", "email", "fullName", "avatarUrl")
+      .update({ fullName: input.fullName.trim() });
+    if (!user) throw new UnauthorizedException();
+    return this.me(tenant);
+  }
+
+  async changePassword(tenant: TenantContext, input: ChangePasswordDto) {
+    const user = await this.db.orm.public.User.where({
+      id: tenant.userId,
+      organizationId: tenant.organizationId,
+    })
+      .select("id", "passwordHash")
+      .first();
+    if (
+      !user ||
+      !(await verifyPassword(input.currentPassword, user.passwordHash))
+    ) {
+      throw new UnauthorizedException("Current password is incorrect");
+    }
+    const passwordHash = await hashPassword(input.newPassword);
+    const updated = await this.db.orm.public.User.where({
+      id: tenant.userId,
+      organizationId: tenant.organizationId,
+      passwordHash: user.passwordHash,
+    })
+      .select("id")
+      .update({ passwordHash });
+    if (!updated)
+      throw new ConflictException(
+        "Password changed during this request. Try again.",
+      );
+    return { message: "Password updated successfully." };
+  }
+
   async createMember(tenant: TenantContext, input: CreateMemberDto) {
     if (!canAssignRole(tenant.role, input.role))
       throw new ForbiddenException("You cannot assign this role");
@@ -187,6 +260,78 @@ export class AuthService {
     if (!updated)
       throw new ForbiddenException("Member role changed; try again");
     return updated;
+  }
+
+  async createRefreshToken(userId: string, organizationId: string) {
+    const user = await this.db.orm.public.User.where({
+      id: userId,
+      organizationId,
+    })
+      .select("passwordHash")
+      .first();
+    if (!user) throw new UnauthorizedException();
+    return this.jwt.signAsync(
+      {
+        sub: userId,
+        organizationId,
+        kind: "refresh",
+        passwordVersion: this.passwordVersion(user.passwordHash),
+      },
+      { audience: "hisab-refresh", expiresIn: 7 * 24 * 60 * 60 },
+    );
+  }
+
+  async refresh(token: string) {
+    let payload: Record<string, unknown>;
+    try {
+      payload = await this.jwt.verifyAsync<Record<string, unknown>>(token, {
+        audience: "hisab-refresh",
+      });
+    } catch {
+      throw new UnauthorizedException("Your session expired. Sign in again.");
+    }
+    if (
+      payload.kind !== "refresh" ||
+      typeof payload.sub !== "string" ||
+      typeof payload.organizationId !== "string" ||
+      typeof payload.passwordVersion !== "string" ||
+      !/^[a-f0-9]{64}$/.test(payload.passwordVersion) ||
+      typeof payload.exp !== "number"
+    )
+      throw new UnauthorizedException("Invalid session");
+    const user = await this.db.orm.public.User.where({
+      id: payload.sub,
+      organizationId: payload.organizationId,
+    })
+      .select("id", "passwordHash")
+      .first();
+    const expected = user ? this.passwordVersion(user.passwordHash) : "";
+    const actual = payload.passwordVersion;
+    if (
+      !user ||
+      actual.length !== expected.length ||
+      !timingSafeEqual(Buffer.from(actual), Buffer.from(expected))
+    )
+      throw new UnauthorizedException("Session no longer valid");
+    const membership = await this.db.orm.public.Membership.where({
+      userId: user.id,
+      organizationId: payload.organizationId,
+    })
+      .select("role")
+      .first();
+    if (!membership || !isRole(membership.role))
+      throw new UnauthorizedException("Membership is no longer valid");
+    return this.session({
+      userId: user.id,
+      organizationId: payload.organizationId,
+      role: membership.role,
+    });
+  }
+
+  private passwordVersion(hash: string) {
+    return createHmac("sha256", process.env.JWT_SECRET!)
+      .update(hash)
+      .digest("hex");
   }
 
   private async session(tenant: TenantContext) {

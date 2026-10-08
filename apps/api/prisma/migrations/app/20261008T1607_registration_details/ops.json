@@ -1,0 +1,254 @@
+[
+  {
+    "id": "column.public.organizations.employeeCount",
+    "label": "Add column \"employeeCount\" to \"organizations\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "employeeCount",
+        "table": "organizations"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"employeeCount\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "organizations",
+          "employeeCount"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"employeeCount\"",
+        "sql": "ALTER TABLE \"public\".\"organizations\" ADD COLUMN \"employeeCount\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"employeeCount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "organizations",
+          "employeeCount"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.organizations.website",
+    "label": "Add column \"website\" to \"organizations\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "website",
+        "table": "organizations"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"website\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "organizations",
+          "website"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"website\"",
+        "sql": "ALTER TABLE \"public\".\"organizations\" ADD COLUMN \"website\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"website\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "organizations",
+          "website"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.users.firstName",
+    "label": "Add column \"firstName\" to \"users\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "firstName",
+        "table": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"firstName\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "firstName"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"firstName\"",
+        "sql": "ALTER TABLE \"public\".\"users\" ADD COLUMN \"firstName\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"firstName\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "firstName"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.users.lastName",
+    "label": "Add column \"lastName\" to \"users\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "lastName",
+        "table": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"lastName\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "lastName"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"lastName\"",
+        "sql": "ALTER TABLE \"public\".\"users\" ADD COLUMN \"lastName\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"lastName\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "lastName"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.users.middleName",
+    "label": "Add column \"middleName\" to \"users\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "middleName",
+        "table": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"middleName\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "middleName"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"middleName\"",
+        "sql": "ALTER TABLE \"public\".\"users\" ADD COLUMN \"middleName\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"middleName\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "middleName"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.users.phoneNumber",
+    "label": "Add column \"phoneNumber\" to \"users\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "phoneNumber",
+        "table": "users"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"phoneNumber\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "phoneNumber"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"phoneNumber\"",
+        "sql": "ALTER TABLE \"public\".\"users\" ADD COLUMN \"phoneNumber\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"phoneNumber\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "users",
+          "phoneNumber"
+        ]
+      }
+    ]
+  }
+]
