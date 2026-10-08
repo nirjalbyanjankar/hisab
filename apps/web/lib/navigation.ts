@@ -1,6 +1,7 @@
 import type { Permission } from "@hisab/permissions";
 
 export type Tab =
+  | "overview"
   | "clients"
   | "members"
   | "invoices"
@@ -15,6 +16,7 @@ export const NAV: {
   icon: string;
   permission: Permission;
 }[] = [
+  { key: "overview", label: "Overview", icon: "", permission: "profile:read" },
   { key: "clients", label: "Clients", icon: "◈", permission: "clients:read" },
   {
     key: "invoices",
@@ -55,6 +57,7 @@ export const NAV: {
   },
 ];
 export const ICON_PATHS: Record<Tab, string> = {
+  overview: "M2 2h6v6H2z M12 2h6v6h-6z M2 12h6v6H2z M12 12h6v6h-6z",
   profile: "M10 10a4 4 0 1 0 0-8a4 4 0 1 0 0 8 M3 18v-1a7 7 0 0 1 14 0v1",
   password: "M5 8V6a5 5 0 0 1 10 0v2 M3 8h14v10H3z M10 12v3",
   clients:
@@ -69,6 +72,7 @@ export const ICON_PATHS: Record<Tab, string> = {
 };
 
 export const DESCRIPTION: Record<Tab, string> = {
+  overview: "A clear starting point for your business.",
   profile: "Keep your personal information up to date.",
   password: "Update the password you use to sign in.",
   clients: "The people and businesses you work with.",

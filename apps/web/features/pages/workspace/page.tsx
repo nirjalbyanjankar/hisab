@@ -19,6 +19,7 @@ import { Navbar } from "../../../components/navbar";
 import { Sidebar } from "../../../components/sidebar";
 import { Footer } from "../../../components/footer";
 import WorkspaceLayout from "./layout";
+import OverviewPage from "../overview/page";
 import ClientsPage from "../clients/page";
 import TeamPage from "../team/page";
 import AccessPage from "../access/page";
@@ -59,7 +60,7 @@ export default function WorkspacePage({
     setNotice(message);
     setNotifications((items) => [message, ...items].slice(0, 20));
   }
-  const [tab, setTab] = useState<Tab>("clients");
+  const [tab, setTab] = useState<Tab>("overview");
   const [offset, setOffset] = useState(0);
   const [rows, setRows] = useState<(Client | Member | FinancialRecord)[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,7 +92,8 @@ export default function WorkspacePage({
     [session.accessToken, onSignOut],
   );
   useEffect(() => {
-    if (["access", "profile", "password"].includes(tab) || !allowed) return;
+    if (["overview", "access", "profile", "password"].includes(tab) || !allowed)
+      return;
     const controller = new AbortController();
     api<(Client | Member | FinancialRecord)[]>(
       `/${tab}?limit=20&offset=${offset}`,
@@ -186,16 +188,17 @@ export default function WorkspacePage({
               </h1>
               <p className="muted">{DESCRIPTION[tab]}</p>
             </div>
-            {!["access", "profile", "password"].includes(tab) && allowed && (
-              <button
-                className="button secondary"
-                type="button"
-                onClick={reload}
-                disabled={loading}
-              >
-                ↻ Refresh
-              </button>
-            )}
+            {!["overview", "access", "profile", "password"].includes(tab) &&
+              allowed && (
+                <button
+                  className="button secondary"
+                  type="button"
+                  onClick={reload}
+                  disabled={loading}
+                >
+                  ↻ Refresh
+                </button>
+              )}
           </div>
           <div className="workspace-context">
             <span>
@@ -232,6 +235,8 @@ export default function WorkspacePage({
                 management. Ask your owner or administrator if you need access.
               </p>
             </section>
+          ) : tab === "overview" ? (
+            <OverviewPage session={session} navigate={navigate} />
           ) : tab === "profile" || tab === "password" ? (
             <CurrentSettingsPage
               key={tab}

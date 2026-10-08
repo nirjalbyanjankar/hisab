@@ -2693,3 +2693,110 @@ tr:hover td {
     transition: none;
   }
 }
+
+.overview-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.overview-welcome {
+  padding: 28px;
+}
+.overview-welcome h2 {
+  font-size: 26px;
+  letter-spacing: -0.7px;
+  margin-bottom: 10px;
+  font-weight: 550;
+}
+.overview-welcome > p {
+  font-size: 13px;
+}
+.overview-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 48px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.overview-details dt {
+  color: var(--muted);
+  font-size: 11px;
+  margin-bottom: 5px;
+}
+.overview-details dd {
+  font-size: 13px;
+  font-weight: 500;
+}
+.overview-section-heading {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.overview-links {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.overview-link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 22px;
+  text-align: left;
+  color: var(--foreground);
+}
+.overview-link strong {
+  font-size: 14px;
+  font-weight: 550;
+}
+.overview-link > .muted {
+  font-size: 12px;
+  line-height: 1.7;
+}
+.overview-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #eff9f4;
+  color: #59816a;
+}
+.overview-arrow {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  color: var(--muted);
+}
+.workspace-layout[data-theme="dark"] .overview-icon {
+  background: #263e30;
+  color: #b1d2bf;
+}
+@media (hover: hover) and (pointer: fine) {
+  .overview-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 16px #10233e0a;
+    border-color: #accab8;
+  }
+}
+@media (max-width: 1100px) {
+  .overview-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .overview-links {
+    grid-template-columns: 1fr;
+  }
+  .overview-welcome {
+    padding: 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .overview-link:hover {
+    transform: none;
+  }
+}

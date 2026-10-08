@@ -176,11 +176,8 @@ export default function LoginPage({
           <Brand />
         </div>
         <h2 key={signup ? "signup-heading" : "login-heading"}>
-          {signup ? "Create your workspace" : "Log in to Hisab"}
+          {signup ? "Create your workspace" : "Log in"}
         </h2>
-        {!signup && (
-          <p className="muted">Sign in to your organization’s workspace.</p>
-        )}
         {signup ? (
           <ol
             className="registration-progress"

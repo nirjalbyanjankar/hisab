@@ -29,7 +29,7 @@ export function Sidebar({
         </div>
       </div>
       <nav aria-label="Workspace navigation">
-        {(["Dashboard", "Settings"] as const).map((group) => (
+        {(["Main Menu", "Settings"] as const).map((group) => (
           <div className="nav-group" key={group}>
             <span className="nav-label">{group}</span>
             {NAV.filter((item) =>
