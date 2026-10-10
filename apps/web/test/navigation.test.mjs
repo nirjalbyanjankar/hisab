@@ -2,17 +2,26 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { NAV, NAV_SECTIONS, resolveTab, sectionForTab, tabHref } from "../lib/navigation.ts";
 
-test("every sidebar destination belongs to exactly one section; access is top-only", () => {
-  const tabs = NAV_SECTIONS.flatMap((section) => section.tabs);
-  assert.equal(new Set(tabs).size, tabs.length);
-  assert.deepEqual([...tabs].sort(), NAV.filter((item) => item.key !== "access").map((item) => item.key).sort());
-  assert.equal(sectionForTab("access"), undefined);
+test("navigation has three sections and includes all destinations", () => {
+  assert.deepEqual(NAV_SECTIONS.map((section) => section.key), ["workspace", "people", "settings"]);
+  const tabs = new Set(NAV_SECTIONS.flatMap((section) => section.tabs));
+  assert.deepEqual([...tabs].sort(), NAV.map((item) => item.key).sort());
 });
 
-test("top navigation tracks all pages in its section", () => {
+test("main features belong to Workspace and access belongs to Settings", () => {
+  for (const tab of ["overview", "invoices", "expenses", "retainers"]) assert.equal(sectionForTab(tab).key, "workspace");
   for (const tab of ["clients", "members"]) assert.equal(sectionForTab(tab).key, "people");
-  for (const tab of ["invoices", "expenses", "retainers"]) assert.equal(sectionForTab(tab).key, "billing");
-  for (const tab of ["profile", "password"]) assert.equal(sectionForTab(tab).key, "settings");
+  for (const tab of ["profile", "password", "access"]) assert.equal(sectionForTab(tab).key, "settings");
+});
+
+test("client links retain their section without permitting unrelated sections", () => {
+  const url = new URL(tabHref("clients", "workspace"), "http://localhost");
+  const tab = resolveTab(url.pathname, url.searchParams.get("section"));
+  assert.equal(tab, "clients");
+  assert.equal(sectionForTab(tab, url.searchParams.get("area")).key, "workspace");
+  assert.equal(sectionForTab("clients", "people").key, "people");
+  assert.equal(sectionForTab("invoices", "people").key, "workspace");
+  assert.equal(sectionForTab("access", "workspace").key, "settings");
 });
 
 test("every destination round-trips through its URL", () => {

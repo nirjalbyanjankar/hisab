@@ -73,6 +73,7 @@ export default function WorkspacePage({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const tab = resolveTab(pathname, searchParams.get("section"), initialTab);
+  const activeSection = sectionForTab(tab, searchParams.get("area"));
   const [previousTab, setPreviousTab] = useState(tab);
   const [offset, setOffset] = useState(0);
   const [rows, setRows] = useState<(Client | Member | FinancialRecord)[]>([]);
@@ -179,6 +180,7 @@ export default function WorkspacePage({
       <Navbar
         session={session}
         tab={tab}
+        area={activeSection.key}
         theme={theme}
         toggleTheme={toggleTheme}
         notifications={notifications}
@@ -187,12 +189,13 @@ export default function WorkspacePage({
       <Sidebar
         session={session}
         tab={tab}
+        area={activeSection.key}
         onSignOut={() => onSignOut()}
       />
       <main className="workspace-main">
         <header className="topbar">
           <span>
-            {sectionForTab(tab)?.label ?? "Account"} <span className="breadcrumb">/</span> {creatingInvoice ? "Create Invoice" : currentNav.label}
+            {activeSection.label} <span className="breadcrumb">/</span> {creatingInvoice ? "Create Invoice" : currentNav.label}
           </span>
           <span className="topbar-slug">{session.organization.slug}</span>
         </header>

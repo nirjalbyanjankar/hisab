@@ -56,22 +56,26 @@ export const NAV: {
     permission: "profile:read",
   },
 ];
-// Top-level sections own their sidebar destinations. Access is top-nav only.
-export const NAV_SECTIONS: { key: string; label: string; tabs: Tab[] }[] = [
-  { key: "workspace", label: "Workspace", tabs: ["overview"] },
+// Clients are available in both Workspace and People; the URL retains that context.
+export type NavigationSection = "workspace" | "people" | "settings";
+export const NAV_SECTIONS: { key: NavigationSection; label: string; tabs: Tab[] }[] = [
+  { key: "workspace", label: "Workspace", tabs: ["overview", "clients", "invoices", "expenses", "retainers"] },
   { key: "people", label: "People", tabs: ["clients", "members"] },
-  { key: "billing", label: "Billing", tabs: ["invoices", "expenses", "retainers"] },
-  { key: "settings", label: "Settings", tabs: ["profile", "password"] },
+  { key: "settings", label: "Settings", tabs: ["profile", "password", "access"] },
 ];
 
-export function sectionForTab(tab: Tab) {
-  return NAV_SECTIONS.find((section) => section.tabs.includes(tab));
+export function sectionForTab(tab: Tab, area?: string | null) {
+  const requested = NAV_SECTIONS.find((section) => section.key === area && section.tabs.includes(tab));
+  if (requested) return requested;
+  // Keep existing client links in People unless Workspace was explicitly selected.
+  if (tab === "clients") return NAV_SECTIONS.find((section) => section.key === "people")!;
+  return NAV_SECTIONS.find((section) => section.tabs.includes(tab))!;
 }
 
-export function tabHref(tab: Tab): string {
+export function tabHref(tab: Tab, area?: NavigationSection): string {
   if (tab === "overview") return "/";
   if (tab === "invoices") return "/invoices";
-  return `/?section=${tab}`;
+  return `/?section=${tab}${tab === "clients" && area === "workspace" ? "&area=workspace" : ""}`;
 }
 
 export function resolveTab(pathname: string, section: string | null, fallback: Tab = "overview"): Tab {

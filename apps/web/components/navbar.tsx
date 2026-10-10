@@ -4,11 +4,12 @@ import { NotificationBell } from "./notification-bell";
 import { Brand } from "./brand";
 import type { Session } from "../lib/api";
 import Link from "next/link";
-import { NAV_SECTIONS, sectionForTab, tabHref, type Tab } from "../lib/navigation";
+import { NAV_SECTIONS, sectionForTab, tabHref, type Tab, type NavigationSection } from "../lib/navigation";
 
 export function Navbar({
   session,
   tab,
+  area,
   theme,
   toggleTheme,
   notifications,
@@ -16,6 +17,7 @@ export function Navbar({
 }: {
   session: Session;
   tab: Tab;
+  area: NavigationSection;
   theme: "light" | "dark";
   toggleTheme: () => void;
   notifications: string[];
@@ -30,15 +32,12 @@ export function Navbar({
         {NAV_SECTIONS.map((section) => (
           <Link
             key={section.key}
-            href={tabHref(section.tabs[0]!)}
-            aria-current={sectionForTab(tab)?.key === section.key ? "location" : undefined}
+            href={tabHref(section.tabs[0]!, section.key)}
+            aria-current={sectionForTab(tab, area).key === section.key ? "location" : undefined}
           >
             {section.label}
           </Link>
         ))}
-        <Link href={tabHref("access")} aria-current={tab === "access" ? "page" : undefined}>
-          My access
-        </Link>
       </nav>
       <div className="header-actions">
         <ThemeSwitch theme={theme} toggleTheme={toggleTheme} />

@@ -2,20 +2,22 @@
 import type { Permission } from "@hisab/permissions";
 import { roleLabel, type Session } from "../lib/api";
 import Link from "next/link";
-import { NAV, ICON_PATHS, sectionForTab, tabHref, type Tab } from "../lib/navigation";
+import { NAV, ICON_PATHS, sectionForTab, tabHref, type Tab, type NavigationSection } from "../lib/navigation";
 
 export function Sidebar({
   session,
   tab,
+  area,
   onSignOut,
 }: {
   session: Session;
   tab: Tab;
+  area: NavigationSection;
   onSignOut: () => void;
 }) {
   const can = (permission: Permission) =>
     session.permissions.includes(permission);
-  const section = sectionForTab(tab);
+  const section = sectionForTab(tab, area);
   return (
     <aside className="sidebar">
       <h2 className="sidebar-title">{section?.label ?? "My access"}</h2>
@@ -34,7 +36,7 @@ export function Sidebar({
             <span className="nav-label">Pages</span>
             {section.tabs.map((key) => NAV.find((item) => item.key === key)!).map((item) => (
               <Link
-                href={tabHref(item.key)}
+                href={tabHref(item.key, section.key)}
                 key={item.key}
                 aria-current={tab === item.key ? "page" : undefined}
                 className={`nav-item ${tab === item.key ? "selected" : ""}`}
