@@ -276,7 +276,7 @@ small {
   z-index: -1;
 }
 .auth-story > .brand {
-  width: 146px;
+  width: 110px;
   z-index: 1;
 }
 .business-visual {
@@ -986,7 +986,7 @@ tr:hover td {
     padding: 24px;
   }
   .auth-story > .brand {
-    width: 125px;
+    width: 100px;
   }
   .business-visual,
   .story-foot {
@@ -2799,4 +2799,20 @@ tr:hover td {
   .overview-link:hover {
     transform: none;
   }
+}
+
+.auth-form-card[data-mode="login"] > form {
+  margin-top: 24px;
+}
+.auth-switch {
+  margin-top: 18px;
+  text-align: center;
+  color: #65748b;
+  font-size: 12px;
+}
+.auth-switch .text-button {
+  color: #0754d6;
+}
+.auth-switch .text-button:hover:not(:disabled) {
+  text-decoration: underline;
 }

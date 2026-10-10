@@ -54,3 +54,10 @@ workspace. The screenshot does not show the contents of the other project's API
 or shared packages; those internals retain Hisab's implementation.
 
 Authentication setup and endpoints: [authentication.md](authentication.md).
+
+## Adminer
+
+`make services.start` also starts Adminer at http://localhost:8080.
+Choose PostgreSQL and server `postgres`; use the credentials from `services/.env`
+or the defaults `hisab_admin` / `hisab_password`, database `hisab_dev`.
+Adminer is bound to localhost and stops with `make services.stop`.

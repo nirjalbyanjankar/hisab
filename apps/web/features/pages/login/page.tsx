@@ -178,7 +178,7 @@ export default function LoginPage({
         <h2 key={signup ? "signup-heading" : "login-heading"}>
           {signup ? "Create your workspace" : "Log in"}
         </h2>
-        {signup ? (
+        {signup && (
           <ol
             className="registration-progress"
             aria-label="Registration progress"
@@ -194,33 +194,6 @@ export default function LoginPage({
               </li>
             ))}
           </ol>
-        ) : (
-          <>
-            <div
-              className="auth-tabs"
-              aria-label="Account options"
-              data-signup={signup}
-            >
-              <button
-                type="button"
-                disabled={busy}
-                className={!signup ? "active" : ""}
-                aria-pressed={!signup}
-                onClick={() => switchMode(false)}
-              >
-                Sign in
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                className={signup ? "active" : ""}
-                aria-pressed={signup}
-                onClick={() => switchMode(true)}
-              >
-                Create organization
-              </button>
-            </div>
-          </>
         )}
         {notice && (
           <p className="notice" role="status">
@@ -341,6 +314,19 @@ export default function LoginPage({
             </div>
           </fieldset>
         </form>
+        {!signup && (
+          <p className="auth-switch">
+            New to Hisab?{" "}
+            <button
+              type="button"
+              className="text-button"
+              disabled={busy}
+              onClick={() => switchMode(true)}
+            >
+              Create an organization
+            </button>
+          </p>
+        )}
         <p className="auth-note">
           Each organization has its own accounts and business records.
         </p>
