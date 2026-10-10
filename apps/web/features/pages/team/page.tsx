@@ -1,4 +1,5 @@
 "use client";
+import { PasswordInput } from "../../../components/password-input";
 import PageLayout from "./layout";
 import { useState, type FormEvent } from "react";
 import { ROLES, canAssignRole, type Role } from "@hisab/permissions";
@@ -146,9 +147,9 @@ export default function TeamPage({
             </label>
             <label>
               Initial password
-              <input
+              <PasswordInput
                 name="password"
-                type="password"
+                visibilityLabel="initial password"
                 required
                 minLength={12}
                 maxLength={128}

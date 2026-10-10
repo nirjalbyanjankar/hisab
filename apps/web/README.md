@@ -9,12 +9,12 @@ The frontend uses the live API. You can:
 - Add/edit clients and view paginated records.
 - Provision team accounts and change roles when permitted.
 - Sign in as a viewer or project manager to inspect the different controls.
-- View invoices and their items, expenses, and retainers.
+- Create draft invoices at `/invoices/new`; view invoices and their items, expenses, and retainers.
 - Review your current permissions on My access and refresh them after a role change.
 
 Use two different organization accounts to check that records remain separate.
-Invoices, expenses and retainers are read-only here because their write endpoints
-have not been implemented; new organizations will see empty lists.
+Expenses and retainers remain read-only. Invoice editing, issuance and deletion
+are not implemented. See [invoice UI and architecture](../../knowledge/invoice-frontend.md).
 
 Access tokens stay in React memory and expire after 15 minutes. A seven-day
 HttpOnly refresh cookie restores the session after reloads and silently renews
@@ -39,8 +39,9 @@ login, workspace, clients, team, invoices, expenses, retainers, access,
 edit-profile, and change-password. The login screen includes the organization
 creation flow and preserves its animated form switch.
 
-`app/` owns Next.js App Router entry points and global styling. `app/page.tsx`
-restores and subscribes to the in-memory session and composes the login/workspace screens.
+`app/` owns Next.js App Router entry points and global styling. `app/page.tsx` delegates to the reused `features/pages/workspace/dashboard-entry.tsx`
+session boundary. `/invoices` and `/invoices/new` are real App Router routes; new
+invoice components, API helpers, hooks, validation and types live in `features/invoices/`.
 `features/pages/` is deliberately nested: a root `pages/` would activate Next.js
 Pages Router and create unintended routes. These screen files are ordinary React
 components; their layouts are composed explicitly and are not automatic routes.

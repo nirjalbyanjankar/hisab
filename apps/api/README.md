@@ -14,5 +14,5 @@ See [development commands](../../knowledge/development.md) and
 [authentication and tenant isolation](../../knowledge/authentication.md).
 
 Authentication, global permission guards, tenant-scoped reads and client creation/updates
-are implemented. JWT_SECRET is required. A basic frontend is available at localhost:3000. Domain financial writes, BullMQ
-and storage integration remain.
+are implemented. JWT_SECRET is required. A basic frontend is available at localhost:3000. Draft invoice creation is implemented in its own invoice module. Other financial
+write workflows, BullMQ and storage integration remain.

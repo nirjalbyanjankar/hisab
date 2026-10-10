@@ -56,6 +56,29 @@ export const NAV: {
     permission: "profile:read",
   },
 ];
+// Top-level sections own their sidebar destinations. Access is top-nav only.
+export const NAV_SECTIONS: { key: string; label: string; tabs: Tab[] }[] = [
+  { key: "workspace", label: "Workspace", tabs: ["overview"] },
+  { key: "people", label: "People", tabs: ["clients", "members"] },
+  { key: "billing", label: "Billing", tabs: ["invoices", "expenses", "retainers"] },
+  { key: "settings", label: "Settings", tabs: ["profile", "password"] },
+];
+
+export function sectionForTab(tab: Tab) {
+  return NAV_SECTIONS.find((section) => section.tabs.includes(tab));
+}
+
+export function tabHref(tab: Tab): string {
+  if (tab === "overview") return "/";
+  if (tab === "invoices") return "/invoices";
+  return `/?section=${tab}`;
+}
+
+export function resolveTab(pathname: string, section: string | null, fallback: Tab = "overview"): Tab {
+  if (pathname === "/invoices" || pathname === "/invoices/new") return "invoices";
+  return NAV.some((item) => item.key === section) ? section as Tab : fallback;
+}
+
 export const ICON_PATHS: Record<Tab, string> = {
   overview: "M2 2h6v6H2z M12 2h6v6h-6z M2 12h6v6H2z M12 12h6v6h-6z",
   profile: "M10 10a4 4 0 1 0 0-8a4 4 0 1 0 0 8 M3 18v-1a7 7 0 0 1 14 0v1",

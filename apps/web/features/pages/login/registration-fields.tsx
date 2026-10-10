@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { PasswordInput } from "../../../components/password-input";
 import {
   suggestedSlug,
   type RegistrationDraft,
@@ -12,16 +12,11 @@ export function RegistrationFields({
   step,
   draft,
   onDraftChange,
-  showPassword,
-  onTogglePassword,
 }: {
   step: number;
   draft: RegistrationDraft;
   onDraftChange: (patch: Partial<RegistrationDraft>) => void;
-  showPassword: boolean;
-  onTogglePassword: () => void;
 }) {
-  const [showConfirmation, setShowConfirmation] = useState(false);
   return (
     <>
       <section
@@ -192,62 +187,35 @@ export function RegistrationFields({
         <div className="registration-pair">
           <label>
             Password <span className="required-mark">*</span>
-            <div className="password-field">
-              <input
+              <PasswordInput
                 name="password"
                 value={draft.password}
                 onChange={(event) =>
                   onDraftChange({ password: event.target.value })
                 }
-                type={showPassword ? "text" : "password"}
                 required
                 minLength={12}
                 maxLength={128}
                 autoComplete="new-password"
                 placeholder="Create a password"
               />
-              <button
-                className="password-toggle"
-                type="button"
-                onClick={onTogglePassword}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                aria-pressed={showPassword}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
             <span className="field-hint">Use at least 12 characters.</span>
           </label>
           <label>
             Confirm password <span className="required-mark">*</span>
-            <div className="password-field">
-              <input
+              <PasswordInput
                 name="confirmPassword"
+                visibilityLabel="confirmation password"
                 value={draft.confirmPassword}
                 onChange={(event) =>
                   onDraftChange({ confirmPassword: event.target.value })
                 }
-                type={showConfirmation ? "text" : "password"}
                 required
                 minLength={12}
                 maxLength={128}
                 autoComplete="new-password"
                 placeholder="Repeat your password"
               />
-              <button
-                className="password-toggle"
-                type="button"
-                onClick={() => setShowConfirmation((visible) => !visible)}
-                aria-label={
-                  showConfirmation
-                    ? "Hide confirmation password"
-                    : "Show confirmation password"
-                }
-                aria-pressed={showConfirmation}
-              >
-                {showConfirmation ? "Hide" : "Show"}
-              </button>
-            </div>
           </label>
         </div>
       </section>

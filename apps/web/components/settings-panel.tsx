@@ -1,4 +1,5 @@
 "use client";
+import { PasswordInput } from "./password-input";
 import { useState, type FormEvent } from "react";
 import type { Profile, User } from "../lib/api";
 import { errorMessage } from "../lib/api";
@@ -97,9 +98,9 @@ export function SettingsPanel({
             <>
               <label>
                 Current password
-                <input
+                <PasswordInput
                   name="currentPassword"
-                  type="password"
+                  visibilityLabel="current password"
                   required
                   maxLength={128}
                   autoComplete="current-password"
@@ -107,9 +108,9 @@ export function SettingsPanel({
               </label>
               <label>
                 New password
-                <input
+                <PasswordInput
                   name="newPassword"
-                  type="password"
+                  visibilityLabel="new password"
                   required
                   minLength={12}
                   maxLength={128}
@@ -119,9 +120,9 @@ export function SettingsPanel({
               </label>
               <label>
                 Confirm new password
-                <input
+                <PasswordInput
                   name="confirmPassword"
-                  type="password"
+                  visibilityLabel="confirmation password"
                   required
                   minLength={12}
                   maxLength={128}

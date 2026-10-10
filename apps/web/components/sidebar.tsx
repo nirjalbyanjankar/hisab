@@ -1,24 +1,24 @@
 "use client";
 import type { Permission } from "@hisab/permissions";
 import { roleLabel, type Session } from "../lib/api";
-import { NAV, ICON_PATHS, type Tab } from "../lib/navigation";
+import Link from "next/link";
+import { NAV, ICON_PATHS, sectionForTab, tabHref, type Tab } from "../lib/navigation";
 
 export function Sidebar({
   session,
   tab,
-  navigate,
   onSignOut,
 }: {
   session: Session;
   tab: Tab;
-  navigate: (tab: Tab) => void;
   onSignOut: () => void;
 }) {
   const can = (permission: Permission) =>
     session.permissions.includes(permission);
+  const section = sectionForTab(tab);
   return (
     <aside className="sidebar">
-      <h2 className="sidebar-title">Workspace</h2>
+      <h2 className="sidebar-title">{section?.label ?? "My access"}</h2>
       <div className="organization-card">
         <span className="organization-icon">
           {session.organization.name.slice(0, 1).toUpperCase()}
@@ -29,20 +29,15 @@ export function Sidebar({
         </div>
       </div>
       <nav aria-label="Workspace navigation">
-        {(["Main Menu", "Settings"] as const).map((group) => (
-          <div className="nav-group" key={group}>
-            <span className="nav-label">{group}</span>
-            {NAV.filter((item) =>
-              group === "Settings"
-                ? ["profile", "password", "access"].includes(item.key)
-                : !["profile", "password", "access"].includes(item.key),
-            ).map((item) => (
-              <button
-                type="button"
+        {section ? (
+          <div className="nav-group">
+            <span className="nav-label">Pages</span>
+            {section.tabs.map((key) => NAV.find((item) => item.key === key)!).map((item) => (
+              <Link
+                href={tabHref(item.key)}
                 key={item.key}
                 aria-current={tab === item.key ? "page" : undefined}
                 className={`nav-item ${tab === item.key ? "selected" : ""}`}
-                onClick={() => navigate(item.key)}
               >
                 <span aria-hidden="true">
                   <svg
@@ -64,10 +59,12 @@ export function Sidebar({
                     •
                   </span>
                 )}
-              </button>
+              </Link>
             ))}
           </div>
-        ))}
+        ) : (
+          <p className="sidebar-context-note">Review your role and permissions here. Choose a section above to return to your workspace.</p>
+        )}
       </nav>
       <div className="sidebar-bottom">
         <div className="account">

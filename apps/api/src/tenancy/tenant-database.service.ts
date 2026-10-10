@@ -72,32 +72,6 @@ export class TenantDatabaseService {
     if (!client) throw new NotFoundException("Client not found");
     return client;
   }
-  listInvoices(page: PageDto) {
-    return this.db.orm.public.Invoice.where({
-      organizationId: this.organizationId,
-    })
-      .orderBy((row) => row.id.asc())
-      .limit(page.limit)
-      .offset(page.offset)
-      .all();
-  }
-  async listInvoiceItems(invoiceId: string, page: PageDto) {
-    const invoice = await this.db.orm.public.Invoice.where({
-      organizationId: this.organizationId,
-      id: invoiceId,
-    })
-      .select("id")
-      .first();
-    if (!invoice) throw new NotFoundException("Invoice not found");
-    return this.db.orm.public.InvoiceItem.where({
-      organizationId: this.organizationId,
-      invoiceId,
-    })
-      .orderBy((row) => row.id.asc())
-      .limit(page.limit)
-      .offset(page.offset)
-      .all();
-  }
   listExpenses(page: PageDto) {
     return this.db.orm.public.Expense.where({
       organizationId: this.organizationId,

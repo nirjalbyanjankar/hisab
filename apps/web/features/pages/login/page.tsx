@@ -1,4 +1,5 @@
 "use client";
+import { PasswordInput } from "../../../components/password-input";
 import { Brand } from "../../../components/brand";
 import LoginLayout from "./layout";
 import { createRegistrationDraft } from "../../../lib/registration";
@@ -20,7 +21,6 @@ export default function LoginPage({
   );
   const [signupStep, setSignupStep] = useState(0);
   const [signup, setSignup] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const formAreaRef = useRef<HTMLElement>(null);
@@ -76,7 +76,6 @@ export default function LoginPage({
     previousHeight.current = cardRef.current?.offsetHeight ?? null;
     setSignup(next);
     setSignupStep(0);
-    setShowPassword(false);
     setError("");
   }
 
@@ -218,8 +217,6 @@ export default function LoginPage({
                 onDraftChange={(patch) =>
                   setRegistrationDraft((current) => ({ ...current, ...patch }))
                 }
-                showPassword={showPassword}
-                onTogglePassword={() => setShowPassword((visible) => !visible)}
               />
             ) : (
               <>
@@ -255,32 +252,18 @@ export default function LoginPage({
                 </label>
                 <label>
                   Password
-                  <div className="password-field">
-                    <input
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      minLength={signup ? 12 : 1}
-                      maxLength={128}
-                      placeholder={
-                        signup ? "At least 12 characters" : "Your password"
-                      }
-                      autoComplete={
-                        signup ? "new-password" : "current-password"
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="password-toggle"
-                      aria-label={
-                        showPassword ? "Hide password" : "Show password"
-                      }
-                      aria-pressed={showPassword}
-                      onClick={() => setShowPassword((visible) => !visible)}
-                    >
-                      {showPassword ? "Hide" : "Show"}
-                    </button>
-                  </div>
+                  <PasswordInput
+                    name="password"
+                    required
+                    minLength={signup ? 12 : 1}
+                    maxLength={128}
+                    placeholder={
+                      signup ? "At least 12 characters" : "Your password"
+                    }
+                    autoComplete={
+                      signup ? "new-password" : "current-password"
+                    }
+                  />
                 </label>
               </>
             )}

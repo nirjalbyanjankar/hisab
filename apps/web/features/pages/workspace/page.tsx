@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { InvoiceForm } from "../../invoices/components/invoice-form";
+import { recentlyCreatedInvoice } from "../../invoices/api/invoices";
 import type { Permission } from "@hisab/permissions";
 import {
   ApiError,
@@ -14,7 +18,7 @@ import {
   type Session,
 } from "../../../lib/api";
 import type { WorkspaceApi } from "../../../lib/api";
-import { NAV, DESCRIPTION, type Tab } from "../../../lib/navigation";
+import { NAV, DESCRIPTION, sectionForTab, resolveTab, tabHref, type Tab } from "../../../lib/navigation";
 import { Navbar } from "../../../components/navbar";
 import { Sidebar } from "../../../components/sidebar";
 import { Footer } from "../../../components/footer";
@@ -33,11 +37,17 @@ export default function WorkspacePage({
   session,
   onSignOut,
   onProfileChange,
+  initialTab,
+  creatingInvoice = false,
 }: {
   session: Session;
+  initialTab?: Tab;
+  creatingInvoice?: boolean;
   onSignOut: (expired?: boolean) => void;
   onProfileChange: (profile: Profile) => void;
 }) {
+  const router = useRouter();
+  const recentDraft = recentlyCreatedInvoice(session.organization.id);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window === "undefined") return "light";
     try {
@@ -60,7 +70,10 @@ export default function WorkspacePage({
     setNotice(message);
     setNotifications((items) => [message, ...items].slice(0, 20));
   }
-  const [tab, setTab] = useState<Tab>("overview");
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tab = resolveTab(pathname, searchParams.get("section"), initialTab);
+  const [previousTab, setPreviousTab] = useState(tab);
   const [offset, setOffset] = useState(0);
   const [rows, setRows] = useState<(Client | Member | FinancialRecord)[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,7 +105,11 @@ export default function WorkspacePage({
     [session.accessToken, onSignOut],
   );
   useEffect(() => {
-    if (["overview", "access", "profile", "password"].includes(tab) || !allowed)
+    if (
+      creatingInvoice ||
+      ["overview", "access", "profile", "password"].includes(tab) ||
+      !allowed
+    )
       return;
     const controller = new AbortController();
     api<(Client | Member | FinancialRecord)[]>(
@@ -113,15 +130,19 @@ export default function WorkspacePage({
         }
       });
     return () => controller.abort();
-  }, [tab, offset, revision, api, allowed]);
-  function navigate(next: Tab) {
-    setTab(next);
+  }, [tab, offset, revision, api, allowed, creatingInvoice]);
+  // Reset page-specific state when URL navigation (including history) changes tabs.
+  if (previousTab !== tab) {
+    setPreviousTab(tab);
     setOffset(0);
     setRows([]);
     setError("");
     setNotice("");
     setLoading(true);
     setLoadFailed(false);
+  }
+  function navigate(next: Tab) {
+    router.push(tabHref(next));
   }
   function reload() {
     setLoadFailed(false);
@@ -158,7 +179,6 @@ export default function WorkspacePage({
       <Navbar
         session={session}
         tab={tab}
-        navigate={navigate}
         theme={theme}
         toggleTheme={toggleTheme}
         notifications={notifications}
@@ -167,38 +187,53 @@ export default function WorkspacePage({
       <Sidebar
         session={session}
         tab={tab}
-        navigate={navigate}
         onSignOut={() => onSignOut()}
       />
       <main className="workspace-main">
         <header className="topbar">
           <span>
-            Workspace <span className="breadcrumb">/</span> {currentNav.label}
+            {sectionForTab(tab)?.label ?? "Account"} <span className="breadcrumb">/</span> {creatingInvoice ? "Create Invoice" : currentNav.label}
           </span>
           <span className="topbar-slug">{session.organization.slug}</span>
         </header>
-        <div className="workspace-content">
+        <div key={`${tab}-${creatingInvoice}`} className="workspace-content page-transition">
           <div className="page-heading">
             <div>
               <span className="eyebrow">{session.organization.name}</span>
               <h1>
-                {currentNav.label === "My access"
-                  ? "Your workspace access"
-                  : currentNav.label}
+                {creatingInvoice
+                  ? "Create Invoice"
+                  : currentNav.label === "My access"
+                    ? "Your workspace access"
+                    : currentNav.label}
               </h1>
-              <p className="muted">{DESCRIPTION[tab]}</p>
+              <p className="muted">
+                {creatingInvoice
+                  ? "Build an invoice and save it as a draft."
+                  : DESCRIPTION[tab]}
+              </p>
             </div>
-            {!["overview", "access", "profile", "password"].includes(tab) &&
-              allowed && (
-                <button
-                  className="button secondary"
-                  type="button"
-                  onClick={reload}
-                  disabled={loading}
-                >
-                  ↻ Refresh
-                </button>
-              )}
+            <div className="page-heading-actions">
+              {!creatingInvoice &&
+                tab === "invoices" &&
+                can("invoices:create") && (
+                  <Link className="button primary" href="/invoices/new">
+                    + Create Invoice
+                  </Link>
+                )}
+              {!creatingInvoice &&
+                !["overview", "access", "profile", "password"].includes(tab) &&
+                allowed && (
+                  <button
+                    className="button secondary"
+                    type="button"
+                    onClick={reload}
+                    disabled={loading}
+                  >
+                    ↻ Refresh
+                  </button>
+                )}
+            </div>
           </div>
           <div className="workspace-context">
             <span>
@@ -221,12 +256,42 @@ export default function WorkspacePage({
               </button>
             </div>
           )}
+          {!creatingInvoice && tab === "invoices" && recentDraft && (
+            <section className="panel invoice-saved-card" role="status">
+              <div>
+                <span className="eyebrow">Draft saved successfully</span>
+                <strong>{recentDraft.invoiceNumber}</strong>
+                <p>
+                  {recentDraft.items.length} line items · Total{" "}
+                  {recentDraft.total}
+                </p>
+              </div>
+              <span className="role-badge">Draft</span>
+            </section>
+          )}
           {notice && (
             <p className="notice" role="status">
               {notice}
             </p>
           )}
-          {!allowed ? (
+          {creatingInvoice ? (
+            can("invoices:create") ? (
+              <InvoiceForm
+                api={api}
+                onCreated={() => router.push("/invoices")}
+              />
+            ) : (
+              <section className="panel empty-state">
+                <h3>Invoice creation is restricted</h3>
+                <p>
+                  Your role allows you to view invoices, but not create them.
+                </p>
+                <Link className="button secondary" href="/invoices">
+                  Back to invoices
+                </Link>
+              </section>
+            )
+          ) : !allowed ? (
             <section className="panel empty-state">
               <span className="empty-symbol">◎</span>
               <h3>This area needs additional access</h3>
