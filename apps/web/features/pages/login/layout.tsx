@@ -44,10 +44,10 @@ export default function LoginLayout({
             <em>{signup ? "A new perspective." : "One workspace."}</em>
           </h1>
           <p>
-            {signup ? "Create your organization and give your daily finances a home." : "Bring your daily finances into focus with Hisab."}
+            {signup ? "Create your organization and give your daily finances a home." : "Bring your daily finances into focus with PuffinPal."}
           </p>
         </div>
-        <ul className="login-story-features" aria-label={signup ? "Your new workspace" : "Hisab features"}>
+        <ul className="login-story-features" aria-label={signup ? "Your new workspace" : "PuffinPal features"}>
           {features.map((feature) => (
             <li key={feature.title}>
               <span className="login-feature-icon" aria-hidden="true">

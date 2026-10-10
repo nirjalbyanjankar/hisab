@@ -64,7 +64,7 @@ typecheck:
 	@printf "\033[0;32m>>> Running type checks\033[0m\n"
 	pnpm run typecheck
 
-# Compatibility with the previous Hisab targets.
+# Compatibility with the previous PuffinPal targets.
 dev: run
 services.up: services.start
 services.down: services.stop

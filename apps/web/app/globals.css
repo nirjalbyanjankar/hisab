@@ -117,17 +117,17 @@ small {
   display: block;
   position: relative;
   width: 154px;
-  aspect-ratio: 3.42;
+  aspect-ratio: 3.56;
   overflow: hidden;
   flex-shrink: 0;
 }
 .brand-logo {
   position: absolute;
-  width: 115%;
+  width: 106%;
   max-width: none;
   height: auto;
-  left: -7.8%;
-  top: -32%;
+  left: -3.17%;
+  top: -20.35%;
 }
 .brand-logo-light {
   filter: brightness(0) invert(1);
@@ -279,7 +279,7 @@ small {
   z-index: -1;
 }
 .auth-story > .brand {
-  width: 110px;
+  width: 180px;
   z-index: 1;
 }
 .business-visual {
@@ -989,7 +989,7 @@ tr:hover td {
     padding: 24px;
   }
   .auth-story > .brand {
-    width: 100px;
+    width: 150px;
   }
   .business-visual,
   .story-foot {

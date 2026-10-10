@@ -14,7 +14,7 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(
       app,
       new DocumentBuilder()
-        .setTitle("Hisab API")
+        .setTitle("PuffinPal API")
         .setVersion("0.1.0")
         .addBearerAuth()
         .build(),

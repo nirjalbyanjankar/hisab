@@ -1,4 +1,4 @@
-# Hisab repository map
+# PuffinPal repository map
 
 - `apps/api`: NestJS API, Prisma config, data contract, migrations, and seed entry point.
 - `apps/web`: Next.js frontend (`@hisab/web`).

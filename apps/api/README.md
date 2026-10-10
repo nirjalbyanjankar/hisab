@@ -1,4 +1,4 @@
-# Hisab API
+# PuffinPal API
 
 NestJS 11 with environment checks, validation, Helmet, CORS, Swagger and graceful
 database shutdown. Run `make run.api` from the root. Environment values are in `.env`.

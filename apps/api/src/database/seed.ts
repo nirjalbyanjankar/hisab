@@ -19,7 +19,7 @@ try {
         slug: "hisab-demo",
       }).first()) ??
       (await tx.orm.public.Organization.create({
-        name: "Hisab Demo",
+        name: "PuffinPal Demo",
         slug: "hisab-demo",
       }));
     const user =

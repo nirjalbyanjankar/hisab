@@ -9,8 +9,9 @@ const siteFont = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Hisab — Your workspace",
-  description: "Manage your clients, team, and business records in Hisab.",
+  title: "PuffinPal — Your workspace",
+  description: "Manage your clients, team, and business records in PuffinPal.",
+  icons: { icon: "/puffinpal-icon.svg" },
 };
 
 export default function RootLayout({

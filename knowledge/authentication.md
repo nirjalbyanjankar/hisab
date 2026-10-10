@@ -24,7 +24,7 @@ employee-count range are saved on Organization. Confirmation passwords are
 validated but never persisted. New fields are nullable in the database and
 optional for API callers to preserve existing records and older signup clients.
 When first/last name are supplied, fullName is derived from the name parts.
-Passwords keep Hisab's existing minimum of 12 characters.
+Passwords keep PuffinPal's existing minimum of 12 characters.
 
 Roles and organization IDs cannot be supplied in this payload. Organization slugs
 and email addresses are normalized to lowercase.

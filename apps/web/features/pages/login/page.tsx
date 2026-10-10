@@ -299,7 +299,7 @@ export default function LoginPage({
         </form>
         {!signup && (
           <p className="auth-switch">
-            New to Hisab?{" "}
+            New to PuffinPal?{" "}
             <button
               type="button"
               className="text-button"

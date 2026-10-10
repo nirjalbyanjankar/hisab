@@ -1,4 +1,4 @@
-# Hisab
+# PuffinPal
 
 Multi-tenant invoice, expense, and retainer management in a pnpm/Turborepo monorepo.
 The current implementation includes authentication, tenant permissions, a NestJS API,

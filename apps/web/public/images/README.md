@@ -13,3 +13,13 @@ Source: https://www.nasa.gov/image-article/earthrise-by-nasa-astronaut-bill-ande
 Original image: https://www.nasa.gov/wp-content/uploads/2024/06/as08-14-2383orig.jpg
 
 The signup panel shares the login panel’s photographic styling and uses its own image and onboarding copy.
+
+## PuffinPal branding
+
+The supplied original is `../puffinpal-logo.png`. The transparent version is
+`../puffinpal-logo-transparent.png`, produced with the built-in imagegen tool.
+Prompt: Remove only the white background, preserve the bird’s opaque white face
+and belly, original colors, shape, typography, and exact “PuffinPal” wordmark;
+output a horizontal PNG with true alpha transparency.
+
+`../puffinpal-icon.svg` is a compact vector puffin mark for browser tabs.

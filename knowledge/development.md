@@ -51,7 +51,7 @@ as part of installation, migrations, or seeding.
 
 `apps/docs` was preserved under `knowledge/starter-docs` and is excluded from the
 workspace. The screenshot does not show the contents of the other project's API
-or shared packages; those internals retain Hisab's implementation.
+or shared packages; those internals retain PuffinPal's implementation.
 
 Authentication setup and endpoints: [authentication.md](authentication.md).
 

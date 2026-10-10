@@ -1,4 +1,4 @@
-# Hisab test UI
+# PuffinPal test UI
 
 Run `make services.start` and `make run` from the repository root, then open
 http://localhost:3000. The API runs on port 3001.
